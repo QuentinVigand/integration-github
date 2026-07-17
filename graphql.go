@@ -38,7 +38,7 @@ type QueryMembers struct {
 			Members struct {
 				Nodes    []NodeMember
 				PageInfo PageInfo
-			} `graphql:"members(first: 100, after: $membersCursor)"` // Paginate members here
+			} `graphql:"members(first: 100, after: $membersCursor)"`
 		} `graphql:"team(slug: $teamSlug)"`
 	} `graphql:"organization(login: $orgName)"`
 }
