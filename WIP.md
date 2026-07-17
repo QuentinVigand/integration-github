@@ -14,8 +14,8 @@ Hello reader, this is an attempt at a github importer, here is the reasoning beh
 - github.com/shurcooL/githubv4: handles objects for query & result and is [recommended by google](https://github.com/google/go-github). I think the struct mapping (when we could just dump the returned json to a record) won't be a perf bottleneck and can be convenient for an exporter later.
   - note: considered raw go but not worth recreating a graphql client. Did not try "regular" graphql clients.
 - structure: resource/resourceName/resourceX.json seemed to make sense considering it is close to recreating the graphql schema
-  - /orgs/%s/org.json
-  - /orgs/%s/teams/%s/members.json
+  - `/orgs/%s/org.json`
+  - `/orgs/%s/teams/%s/members.json`
 - Orgs are fetched first but subresources are in nested loops (team -> members), this is an arbitrary choice for later parallelization (per org) and allow early GC (team per team), I don't know out it will hold when adding more data.
 
 ### Questions, notes & discussions
