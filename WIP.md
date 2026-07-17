@@ -20,7 +20,7 @@ Hello reader, this is an attempt at a github importer, here is the reasoning beh
 
 ### Questions, notes & discussions
 
-If any part of the codes or reason above seem wrong or debatable, free to comment!
+If any part of the codes or reason above seem wrong or debatable, feel free to comment!
 
 Questions:
 - What are parameters that make sense? One would assume that this integration could be used a lot to backup a single org, or a maybe personnal repo with no org.
