@@ -1,6 +1,12 @@
-Goal: having something that works enough to start discussion on how we should do the integration
+# WIP.md: Rationale and discussion topics
+
+## Current goal
+Having something that works enough to start discussion on how we should do the integration
+
 
 Hello reader, this is an attempt at a github importer, here is the reasoning behind this first implementation and some discussions topics/questions:
+
+### Rationale
 
 - No git specific data: this can be added with a git specific integration/later
 - Graphql (api v4) vs Rest (api v3): graphql should lead to less network calls and useless bloat in responses.
@@ -11,7 +17,8 @@ Hello reader, this is an attempt at a github importer, here is the reasoning beh
   - /orgs/%s/org.json
   - /orgs/%s/teams/%s/members.json
 - Orgs are fetched first but subresources are in nested loops (team -> members), this is an arbitrary choice for later parallelization (per org) and allow early GC (team per team), I don't know out it will hold when adding more data.
-- 
+
+### Questions, notes & discussions
 
 If any part of the codes or reason above seem wrong or debatable, free to comment!
 
@@ -23,6 +30,7 @@ Notes:
 - Recreating the complete github data model in code (needed for graphql queries) seems redundant, but I don't see a way around it.
 - Github's graphql does sometime have breaking changes in its graphql api https://docs.github.com/en/graphql/overview/breaking-changes, something to keep in mind before adding every known github resource to the repo.
 
+### Later
 Features to add later:
 - handle github's rate limiting (less straight forward with the graphql API than the REST)
 - fail early if wrong access rights on token
