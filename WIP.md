@@ -29,6 +29,7 @@ Questions:
 Notes:
 - Recreating the complete github data model in code (needed for graphql queries) seems redundant, but I don't see a way around it.
 - Github's graphql does sometime have breaking changes in its graphql api https://docs.github.com/en/graphql/overview/breaking-changes, something to keep in mind before adding every known github resource to the repo.
+- The graphql library rewrites scalar types which I am not a fan of, I hope this will be tackled
 
 ### Later
 Features to add later:
