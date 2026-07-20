@@ -36,6 +36,13 @@ func (g *github) Ping(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("running ping query: %w", err)
 	}
+	if ping.RateLimit.Remaining <= 0 {
+		return fmt.Errorf("%w: 0/%d points left (resets at %s)",
+			ErrRateLimitExceeded,
+			ping.RateLimit.Limit,
+			ping.RateLimit.ResetAt.Time.Format(time.RFC3339),
+		)
+	}
 	return nil
 }
 
