@@ -24,7 +24,7 @@ If any part of the codes or reason above seem wrong or debatable, feel free to c
 
 Questions:
 - What are parameters that make sense? One would assume that this integration could be used a lot to backup a single org, or a maybe personnal repo with no org.
-- Do you believe the approach taken for this integration can scale (hold up to breaking changes, keep up to evercoming knew features..) even though it is a lot of manual data mapping.
+- Do you believe the approach taken for this integration can scale (hold up to breaking changes, keep up to evercoming new features..) even though it is a lot of manual data mapping.
 
 Notes:
 - Recreating the complete github data model in code (needed for graphql queries) seems redundant, but I don't see a way around it.
