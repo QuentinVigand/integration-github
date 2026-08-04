@@ -169,7 +169,7 @@ func (g *github) getOrgs(ctx context.Context) ([]NodeOrg, error) {
 			variables["cursor"] = new(query.Viewer.Organizations.PageInfo.EndCursor)
 		}
 	} else {
-		var eg errgroup.Group
+		eg, subCtx := errgroup.WithContext(ctx)
 		orgs = make([]NodeOrg, len(g.orgs), len(g.orgs))
 		for i, org := range g.orgs {
 			eg.Go(func() error {
@@ -177,7 +177,7 @@ func (g *github) getOrgs(ctx context.Context) ([]NodeOrg, error) {
 					"orgLogin": githubv4.String(org),
 				}
 				var query QueryOrg
-				if err := g.client.Query(ctx, &query, variables); err != nil {
+				if err := g.client.Query(subCtx, &query, variables); err != nil {
 					return fmt.Errorf("fetching org: %w", err)
 				}
 				orgs[i] = query.Organization
