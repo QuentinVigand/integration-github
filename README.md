@@ -13,7 +13,7 @@ make sure it has READ rights for all data you want to backup.*
 ## Configuration
 
 - `token` (**required**): The GitHub token that will be used to authenticate to GitHub's API.
-- `orgs`: Comma separated organizations to backup, use the login value (the value in github's URL for the org page). **Default**: lists all orgs.
+- `orgs`: Comma separated organizations to backup, use the login value (the value in github's URL for the org page). **Default**: lists all orgs that the token owner belongs to.
 
 ## Examples
 
