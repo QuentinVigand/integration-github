@@ -35,6 +35,10 @@ type QueryOrgs struct {
 		} `graphql:"organizations(first: 100, after: $cursor)"`
 	}
 }
+
+type QueryOrg struct {
+	Organization NodeOrg `graphql:"organization(login: $orgLogin)"`
+}
 type QueryTeams struct {
 	Organization struct {
 		Teams struct {

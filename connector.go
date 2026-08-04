@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/PlakarKorp/kloset/connectors"
@@ -16,10 +17,12 @@ import (
 	"github.com/PlakarKorp/kloset/objects"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 )
 
 type github struct {
 	client *githubv4.Client
+	orgs   []string
 }
 
 func (g *github) Origin() string { return "https://api.github.com" }
@@ -144,28 +147,56 @@ func (g *github) getTeamMembers(ctx context.Context, org githubv4.String, team g
 	return members, nil
 }
 
-func (g *github) Import(ctx context.Context, records chan<- *connectors.Record, results <-chan *connectors.Result) error {
-	defer close(records)
-
+func (g *github) getOrgs(ctx context.Context) ([]NodeOrg, error) {
 	var orgs []NodeOrg
 	var orgCursor *githubv4.String
 
-	variables := map[string]any{
-		"cursor": orgCursor,
+	if g.orgs == nil {
+		variables := map[string]any{
+			"cursor": orgCursor,
+		}
+
+		for {
+			var query QueryOrgs
+			if err := g.client.Query(ctx, &query, variables); err != nil {
+				return nil, fmt.Errorf("fetching orgs: %w", err)
+			}
+			orgs = append(orgs, query.Viewer.Organizations.Nodes...)
+
+			if !query.Viewer.Organizations.PageInfo.HasNextPage {
+				break
+			}
+			variables["cursor"] = new(query.Viewer.Organizations.PageInfo.EndCursor)
+		}
+	} else {
+		var eg errgroup.Group
+		orgs = make([]NodeOrg, len(g.orgs), len(g.orgs))
+		for i, org := range g.orgs {
+			eg.Go(func() error {
+				variables := map[string]any{
+					"orgLogin": githubv4.String(org),
+				}
+				var query QueryOrg
+				if err := g.client.Query(ctx, &query, variables); err != nil {
+					return fmt.Errorf("fetching org: %w", err)
+				}
+				orgs[i] = query.Organization
+				return nil
+			})
+		}
+		if err := eg.Wait(); err != nil {
+			return nil, err
+		}
 	}
+	return orgs, nil
+}
 
-	for {
-		var query QueryOrgs
-		if err := g.client.Query(ctx, &query, variables); err != nil {
-			return fmt.Errorf("fetching orgs: %w", err)
-		}
+func (g *github) Import(ctx context.Context, records chan<- *connectors.Record, results <-chan *connectors.Result) error {
+	defer close(records)
 
-		orgs = append(orgs, query.Viewer.Organizations.Nodes...)
-
-		if !query.Viewer.Organizations.PageInfo.HasNextPage {
-			break
-		}
-		variables["cursor"] = new(query.Viewer.Organizations.PageInfo.EndCursor)
+	orgs, err := g.getOrgs(ctx)
+	if err != nil {
+		return err
 	}
 
 	for _, org := range orgs {
@@ -181,7 +212,7 @@ func init() {
 	importer.Register("github", 0, NewImporter)
 }
 
-func NewImporter(ctx context.Context, opts *connectors.Options, str string, config map[string]string) (importer.Importer, error) {
+func NewImporter(ctx context.Context, opts *connectors.Options, proto string, config map[string]string) (importer.Importer, error) {
 	token, ok := config["token"]
 	if !ok {
 		return nil, fmt.Errorf("missing token in config")
@@ -190,8 +221,14 @@ func NewImporter(ctx context.Context, opts *connectors.Options, str string, conf
 		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(ctx, src)
+	orgsParam := config["orgs"]
+	var orgs []string
+	if orgsParam != "" {
+		orgs = strings.Split(orgsParam, ",")
+	}
 
 	return &github{
 		client: githubv4.NewClient(httpClient),
+		orgs:   orgs,
 	}, nil
 }
